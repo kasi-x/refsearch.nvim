@@ -7,7 +7,6 @@ describe("jksearch.word_under_cursor() (public API)", function()
       return {
         lemma_under_cursor = function()
           local col = vim.fn.col(".")
-          local line = vim.fn.getline(".")
           -- 形態素(1-9) 解析(10-15) を(16-18) する(19-24) 。(25-27)
           local tokens = {
             { surface = "形態素", start = 1, pos = "名詞", lemma = "形態素" },
