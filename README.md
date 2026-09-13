@@ -95,6 +95,13 @@ vim.g.jksearch_configuration = {
 :JKSearchInit!        " 可視ウィンドウで Chrome を起動 (手動ログイン用)
 ```
 
+Lua API:
+
+```lua
+-- カーソル下の検索語を取得 (辞書形化 + 複合名詞展開)
+local word = require("jksearch").word_under_cursor()
+```
+
 お好みでキーマップに登録できます:
 
 ```lua

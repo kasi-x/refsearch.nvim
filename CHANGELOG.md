@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `require("jksearch").word_under_cursor()`: カーソル下の検索語の抽出
+  (辞書形化 + 複合名詞展開) を公開 API 化
+
 ### Fixed
 
 - 意味全文の取得が失敗したとき、同じ URL の再取得ができないままになって

@@ -455,10 +455,11 @@ local function compound_noun_under_cursor()
   return word.compound_noun(words, positions, infos, cursor)
 end
 
----カーソル下の語を bunsetsu で辞書形化して検索する。
+---カーソル下の語を bunsetsu で辞書形化して返す。
 ---名詞+名詞の複合語は分割せず、連続する名詞全体 (一語) を検索語にする。
+---公開 API: 検索語の抽出だけを他の用途から使うこともできる。
 ---@return string|nil 検索語
-local function word_under_cursor()
+function M.word_under_cursor()
   local ok, bunsetsu = pcall(require, "bunsetsu")
   if not ok then
     vim.notify("jk-search: bunsetsu.nvim が見つかりません", vim.log.levels.ERROR)
@@ -487,7 +488,7 @@ end
 function M.command(args)
   local query = args[1]
   if not query or query == "" then
-    query = word_under_cursor()
+    query = M.word_under_cursor()
   end
   if not query or query == "" then
     return
@@ -497,7 +498,7 @@ end
 
 ---カーソル下の語を検索 (B キー用)。
 function M.search_cursor()
-  local query = word_under_cursor()
+  local query = M.word_under_cursor()
   if query then
     search(query)
   end
