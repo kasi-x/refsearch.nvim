@@ -1,6 +1,5 @@
 describe("refsearch.source (registry)", function()
   local source_mod = require("refsearch.source")
-  local config = require("refsearch.config")
 
   after_each(function()
     package.loaded["refsearch.sources.test_source"] = nil

@@ -117,7 +117,6 @@ end
 ---:checkhealth からの拡張ポイント。実行環境を点検する。
 function M.check()
   local sc = source_config()
-  local name = "japanknowledge"
 
   if not (sc.redirector and sc.redirector ~= "") or not (sc.proxy and sc.proxy ~= "") then
     vim.health.error(
