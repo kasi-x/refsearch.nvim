@@ -1,36 +1,16 @@
 ---検索結果パネル (索引 + 意味ウィンドウ) の UI。
 --
--- 表示のみを担当し、プロセス実行 (fetch / open_tabs) は init.lua 側から
--- hooks として受け取る。
+-- ソース非依存: 意味全文の取得 (fetch) とブラウザで開く (open) は、
+-- 表示中のソース (source.fetch / source.open) に委譲する。
 --
--- 使い方: picker.show(data, hooks)
---   data  : run_script の結果 (results / exact / query)
---   hooks :
---     fetch(item, on_done) 意味全文を非同期取得して on_done(text) を呼ぶ
---     open_tabs(urls)      常駐 Chrome のタブで URL を開く
+-- 使い方: picker.show(data, source)
+--   data   : source.search の結果 (results / exact / query / source)
+--   source : 検索に使ったソース (fetch / open / name を使用)
 
-local config = require("jksearch.config")
 local history = require("jksearch.history")
 local word = require("jksearch.word")
 
 local M = {}
-
----常駐 Chrome のタブで URL を複数開く (jk-search.js --open-tabs)。
----@param urls string[]
-local function open_tabs(urls)
-  if #urls == 0 then
-    return
-  end
-  local args = vim.list_extend(config.env_args(), {
-    config.DATA.node,
-    config.DATA.script,
-    "--open-tabs",
-  })
-  for _, u in ipairs(urls) do
-    args[#args + 1] = u
-  end
-  vim.fn.jobstart(args, { detach = true })
-end
 
 ---検索結果を画面下部のパネルで表示する (元のバッファはそのまま残す)。
 ---レイアウト (最下部 5 行パネル):
@@ -40,11 +20,19 @@ end
 ---   n/e  次/前の項目
 ---   <CR> カーソル行の項目をブラウザで開く
 ---   q    閉じる
----@param data JKSearch.Result
-function M.show(data)
+---@param data table source.search の結果
+---@param source table 検索に使ったソース (fetch / open / name)
+function M.show(data, source)
+  source = source
+    or {
+      name = data.source or "",
+      fetch = function(_, cb)
+        cb(nil)
+      end,
+    }
   local hits = data.results or {}
   if #hits == 0 then
-    vim.notify("ジャパンナレッジ: 検索結果 0 件", vim.log.levels.INFO)
+    vim.notify(("検索結果 0 件 (%s)"):format(source.name), vim.log.levels.INFO)
     return
   end
 
@@ -83,7 +71,7 @@ function M.show(data)
 
   -- 履歴に保存済みの意味全文を読み込む
   do
-    local entry = history.get(query)
+    local entry = history.get(source.name, query)
     if entry and entry.results then
       for _, r in ipairs(entry.results) do
         if r.text then
@@ -110,33 +98,17 @@ function M.show(data)
       return
     end
     fetching[url] = true
-    local node = config.DATA.node or "node"
-    local script = config.DATA.script
-    vim.fn.jobstart(vim.list_extend(config.env_args(), { node, script, "--fetch", url }), {
-      stdout_buffered = true,
-      on_stdout = function(_, outdata)
-        if outdata and #outdata > 0 then
-          local json = table.concat(outdata, "")
-          local ok, parsed = pcall(vim.json.decode, json)
-          if ok and parsed.status == "ok" and parsed.text then
-            text_cache[url] = parsed.text
-            fetching[url] = nil
-            history.store_text(query, url, parsed.text)
-            if on_done then
-              on_done(parsed.text)
-            end
-          else
-            -- 失敗時はフラグを戻して再取得できるようにする
-            fetching[url] = nil
-          end
+    -- 意味全文の取得はソース (source.fetch) に委譲する
+    source.fetch(item, function(text)
+      fetching[url] = nil
+      if text then
+        text_cache[url] = text
+        history.store_text(source.name, query, url, text)
+        if on_done then
+          on_done(text)
         end
-      end,
-      on_exit = function(_, code)
-        if code ~= 0 then
-          fetching[url] = nil
-        end
-      end,
-    })
+      end
+    end)
   end
 
   -- 表示幅に収まるよう全角を考慮して文字列を切り詰める。
@@ -241,8 +213,8 @@ function M.show(data)
   vim.keymap.set("n", "<CR>", function()
     local lnum = vim.api.nvim_win_get_cursor(index_win)[1]
     local item = items[lnum]
-    if item and item.url then
-      open_tabs({ item.url })
+    if item and item.url and source.open then
+      source.open(item)
     end
   end, vim.tbl_extend("force", opts, { desc = "Open in browser" }))
   vim.keymap.set("n", "q", function()

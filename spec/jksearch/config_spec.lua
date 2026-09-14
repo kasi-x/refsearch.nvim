@@ -2,24 +2,36 @@ describe("jksearch.config", function()
   local config = require("jksearch.config")
 
   it("has no institution-specific defaults", function()
-    -- 公開版は所属機関固有の URL を既定値に持たない
-    assert.are.equal("", config.DATA.redirector)
-    assert.are.equal("", config.DATA.proxy)
+    local jk = config.DATA.sources.japanknowledge
+    assert.are.equal("", jk.redirector)
+    assert.are.equal("", jk.proxy)
+  end)
+
+  it("defaults to the japanknowledge source", function()
+    assert.are.equal("japanknowledge", config.DATA.default_source)
   end)
 
   it("merges user configuration via setup()", function()
     config.setup({
-      redirector = "https://go.openathens.net/redirector/example.ac.jp",
-      proxy = "https://japanknowledge-com.example.proxy.openathens.net",
-      headless = true,
+      default_source = "japanknowledge",
+      sources = {
+        japanknowledge = {
+          redirector = "https://go.openathens.net/redirector/example.ac.jp",
+          proxy = "https://japanknowledge-com.example.proxy.openathens.net",
+          headless = true,
+        },
+      },
     })
-    assert.are.equal("https://go.openathens.net/redirector/example.ac.jp", config.DATA.redirector)
-    assert.are.equal("https://japanknowledge-com.example.proxy.openathens.net", config.DATA.proxy)
-    assert.is_true(config.DATA.headless)
+    local jk = config.DATA.sources.japanknowledge
+    assert.are.equal("https://go.openathens.net/redirector/example.ac.jp", jk.redirector)
+    assert.are.equal("https://japanknowledge-com.example.proxy.openathens.net", jk.proxy)
+    assert.is_true(jk.headless)
     -- 他の既定値は維持される
-    assert.are.equal("node", config.DATA.node)
+    assert.are.equal("node", jk.node)
 
     -- 後片付け
-    config.setup({ redirector = "", proxy = "", headless = false })
+    config.setup({
+      sources = { japanknowledge = { redirector = "", proxy = "", headless = false } },
+    })
   end)
 end)

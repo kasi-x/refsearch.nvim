@@ -11,10 +11,16 @@ Neovim プラグイン。詳細は Vim help (`:h jksearch`) も参照してく�
 > Search Japan Knowledge Lib from Neovim with lemma normalization via
 > [bunsetsu.nvim](https://github.com/kasi-x/bunsetsu.nvim) (OpenAthens; docs in Japanese).
 
-日本語の語は [bunsetsu.nvim](https://github.com/kasi-x/bunsetsu.nvim)
-(Vibrato + UniDic) で辞書形に正規化してから検索します
+[bunsetsu.nvim](https://github.com/kasi-x/bunsetsu.nvim)
+(Vibrato + UniDic) で辞書形に正規化した語で検索します
 (例: 「走っ」→「走る」)。検索は専用プロファイルのバックグラウンド Chrome
 (Puppeteer) で実行するため、メインのブラウザには一切触れません。
+
+**アーキテクチャ (ref.vim 風)**: このプラグインは検索ソースのフレームワーク
+(ピッカー・クエリ抽出・履歴) であり、検索先は**ソース**として追加します。
+ジャパンナレッジLib は同梱のオプショナルソース
+(`lua/jksearch/sources/japanknowledge.lua`) で、使わなければ読み込まれません。
+自前のソースを `lua/jksearch/sources/<name>.lua` に置けば追加できます。
 
 所属機関の OpenAthens 経由でのアクセスを前提としています
 (大学等でジャパンナレッジLib を契約している方向け)。
@@ -190,6 +196,38 @@ make check-stylua
 ```
 
 テストはネットワーク・Chrome を使わない (config / history / word モジュール)。
+
+## ソースを追加する
+
+`lua/jksearch/sources/<name>.lua` に次のフィールドを持つテーブルを返す
+モジュールを置くと (自プラグインの runtimepath でも可)、`default_source`
+やソース切り替えから使えます:
+
+```lua
+local M = { name = "<name>" }
+
+function M.search(query, on_result)
+  -- 非同期で検索し、結果を on_result に渡す
+  on_result({
+    status = "ok",
+    total = 3,
+    results = {
+      { title = "見出し", dict = "辞書名", snippet = "概要", url = "https://..." },
+    },
+    exact = {}, -- 見出しが検索語と完全一致した項目
+  })
+end
+
+function M.fetch(item, on_done)
+  on_done("項目の意味全文") -- 任意
+end
+
+function M.open(item) -- 任意
+  vim.fn.jobstart({ "xdg-open", item.url }, { detach = true })
+end
+
+return M
+```
 
 ## ライセンス
 
