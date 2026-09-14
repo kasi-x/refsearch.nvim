@@ -7,6 +7,7 @@
 --   data   : source.search の結果 (results / exact / query / source)
 --   source : 検索に使ったソース (fetch / open / name を使用)
 
+local config = require("refsearch.config")
 local history = require("refsearch.history")
 local word = require("refsearch.word")
 
@@ -124,8 +125,9 @@ function M.show(data, source)
     return item.title
   end
 
-  local PANEL_HEIGHT = 5
-  local INDEX_WIDTH = 10
+  local picker_opts = config.DATA.picker or {}
+  local PANEL_HEIGHT = picker_opts.height or 5
+  local INDEX_WIDTH = picker_opts.index_width or 10
 
   -- 索引バッファ
   local index_buf = vim.api.nvim_create_buf(false, true) -- scratch, unlisted

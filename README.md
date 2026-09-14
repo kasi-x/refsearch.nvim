@@ -133,6 +133,7 @@ lazy.nvim では dependencies に refsearch.nvim を指定します (dependency 
 | `script` | `~/.local/share/refsearch/bin/refsearch.js` | 検索スクリプトのパス |
 | `profile` | `~/.local/share/refsearch/profile` | Chrome 専用プロファイル (ログイン状態の保持用) |
 | `history_file` | `~/.local/share/refsearch/history.json` | 検索履歴キャッシュの保存先 |
+| `picker.height` / `picker.index_width` | パネル (索引ウィンドウ) の高さと索引の幅 |
 
 ## 使い方
 

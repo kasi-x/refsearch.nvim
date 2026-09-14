@@ -8,6 +8,11 @@ M.DATA = {
   default_source = "japanknowledge",
   -- 検索履歴キャッシュの保存先 (ソース名ごとに分けて保存される)
   history_file = vim.fn.expand("~/.local/share/refsearch/history.json"),
+  -- 検索結果パネルの表示設定
+  picker = {
+    height = 5, -- パネル (索引ウィンドウ) の高さ
+    index_width = 10, -- 索引ウィンドウの幅
+  },
   -- ソースごとの設定
   sources = {
     japanknowledge = {

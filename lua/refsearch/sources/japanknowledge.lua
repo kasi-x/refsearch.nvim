@@ -114,6 +114,36 @@ local function run_js(args, on_finish)
   return job
 end
 
+---:checkhealth からの拡張ポイント。実行環境を点検する。
+function M.check()
+  local sc = source_config()
+  local name = "japanknowledge"
+
+  if not (sc.redirector and sc.redirector ~= "") or not (sc.proxy and sc.proxy ~= "") then
+    vim.health.error(
+      "OpenAthens の設定がありません (sources.japanknowledge.redirector / proxy)",
+      "所属機関の URL を vim.g.refsearch_configuration に設定してください"
+    )
+  else
+    vim.health.ok("OpenAthens 設定: OK")
+  end
+
+  if vim.fn.executable(sc.node or "node") == 1 then
+    vim.health.ok(("node: %s"):format(sc.node or "node"))
+  else
+    vim.health.error(("node が見つかりません: %s"):format(sc.node or "node"))
+  end
+
+  local script = script_path()
+  if script ~= "" and vim.fn.filereadable(script) == 1 then
+    vim.health.ok(("検索スクリプト: %s"):format(script))
+  else
+    vim.health.error(
+      "検索スクリプト (bin/refsearch.js) が見つかりません。script 設定でパスを指定してください"
+    )
+  end
+end
+
 ---認証が必要なときの案内。
 local function notify_auth()
   vim.notify(
