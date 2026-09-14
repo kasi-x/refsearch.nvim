@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 検索結果パネルの UI を `jksearch.picker` モジュールに分離し、
+  init.lua はオーケストレーション専用に (574 行 → init 326 行 + picker 267 行)
+- スクリプト実行の環境変数組み立て (`env_args` / NODE_PATH の遅延解決) を
+  config モジュールに移動
+
+## [Previous]
+
 ### Added
 
 - `require("jksearch").word_under_cursor()`: カーソル下の検索語の抽出

@@ -33,4 +33,38 @@ function M.setup(opts)
   end
 end
 
+-- node のグローバルモジュールパス (NODE_PATH)。初回使用時に一度だけ計算する。
+-- npm が無い環境でも require 時に落ちないよう、計算は遅延させる。
+local node_path
+
+---@return string 空文字列なら NODE_PATH を設定しない
+local function node_path_value()
+  if node_path == nil then
+    local ok, out = pcall(vim.fn.system, "npm root -g")
+    node_path = (ok and vim.v.shell_error == 0) and out:gsub("%s+$", "") or ""
+  end
+  return node_path
+end
+
+---スクリプト実行用の環境変数プレフィックス ({ "env", "NODE_PATH=...", ... })。
+---redirector / proxy / headless 設定を環境変数に反映する。
+---@return string[]
+function M.env_args()
+  local args = { "env" }
+  local np = node_path_value()
+  if np ~= "" then
+    args[#args + 1] = "NODE_PATH=" .. np
+  end
+  if M.DATA.redirector and M.DATA.redirector ~= "" then
+    args[#args + 1] = "JK_REDIRECTOR=" .. M.DATA.redirector
+  end
+  if M.DATA.proxy and M.DATA.proxy ~= "" then
+    args[#args + 1] = "JK_PROXY=" .. M.DATA.proxy
+  end
+  if M.DATA.headless then
+    args[#args + 1] = "JK_HEADLESS=1"
+  end
+  return args
+end
+
 return M
