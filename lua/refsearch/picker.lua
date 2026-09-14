@@ -7,8 +7,8 @@
 --   data   : source.search の結果 (results / exact / query / source)
 --   source : 検索に使ったソース (fetch / open / name を使用)
 
-local history = require("jksearch.history")
-local word = require("jksearch.word")
+local history = require("refsearch.history")
+local word = require("refsearch.word")
 
 local M = {}
 
@@ -138,7 +138,7 @@ function M.show(data, source)
   vim.bo[index_buf].modifiable = false
   vim.bo[index_buf].buftype = "nofile"
   vim.bo[index_buf].bufhidden = "wipe"
-  vim.bo[index_buf].filetype = "jksearch"
+  vim.bo[index_buf].filetype = "refsearch"
   vim.b[index_buf].jk_items = items
 
   -- 意味バッファ

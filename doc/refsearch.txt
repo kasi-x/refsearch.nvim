@@ -1,19 +1,19 @@
-*jksearch.txt*   カーソル下の語でジャパンナレッジLibを検索する Neovim プラグイン
+*refsearch.txt*   カーソル下の語でジャパンナレッジLibを検索する Neovim プラグイン
 
 ================================================================================
-CONTENTS                                                   *jksearch-contents*
+CONTENTS                                                   *refsearch-contents*
 
-1. 概要...................................|jksearch-overview|
-2. インストール...........................|jksearch-install|
-3. 設定...................................|jksearch-config|
-4. 使い方.................................|jksearch-usage|
-5. 注意...................................|jksearch-notice|
-6. ライセンス............................|jksearch-license|
+1. 概要...................................|refsearch-overview|
+2. インストール...........................|refsearch-install|
+3. 設定...................................|refsearch-config|
+4. 使い方.................................|refsearch-usage|
+5. 注意...................................|refsearch-notice|
+6. ライセンス............................|refsearch-license|
 
 ================================================================================
-1. 概要                                               *jksearch-overview*
+1. 概要                                               *refsearch-overview*
 
-jk-search.nvim は、カーソル下の語でジャパンナレッジLib
+refsearch.nvim は、カーソル下の語でジャパンナレッジLib
 (https://japanknowledge.com/lib/) を検索する Neovim プラグインです。
 
 日本語の語は bunsetsu.nvim で辞書形に正規化してから検索します
@@ -24,11 +24,11 @@ jk-search.nvim は、カーソル下の語でジャパンナレッジLib
 ジャパンナレッジLib を契約している方向け)。
 
 ================================================================================
-2. インストール                                       *jksearch-install*
+2. インストール                                       *refsearch-install*
 
 lazy.nvim: >lua
     {
-        "kasi-x/jk-search.nvim",
+        "kasi-x/refsearch.nvim",
         dependencies = { "kasi-x/bunsetsu.nvim" },
     }
 <
@@ -37,13 +37,13 @@ puppeteer-core はグローバルインストール、またはプラグイン�
 ローカルインストール (`npm install`) が利用できます。
 
 ================================================================================
-3. 設定                                                 *jksearch-config*
+3. 設定                                                 *refsearch-config*
 
-設定は vim.g.jksearch_configuration にテーブルで渡します。
+設定は vim.g.refsearch_configuration にテーブルで渡します。
 
 default_source   既定の検索ソース名。省略値: "japanknowledge"
 history_file     検索履歴キャッシュの保存先。
-                 省略値: "~/.local/share/jk-search/history.json"
+                 省略値: "~/.local/share/refsearch/history.json"
 sources          ソースごとの設定テーブル。japanknowledge ソースでは
                  次のキーが使える:
                    redirector : OpenAthens リダイレクタ URL (必須)
@@ -53,7 +53,7 @@ sources          ソースごとの設定テーブル。japanknowledge ソース
                    headless   : true でヘッドレス Chrome
 
 設定例: >lua
-    vim.g.jksearch_configuration = {
+    vim.g.refsearch_configuration = {
         default_source = "japanknowledge",
         sources = {
             japanknowledge = {
@@ -65,9 +65,9 @@ sources          ソースごとの設定テーブル。japanknowledge ソース
 <
 
 ================================================================================
-3.1 ソースを追加する                               *jksearch-add-source*
+3.1 ソースを追加する                               *refsearch-add-source*
 
-`lua/jksearch/sources/<name>.lua` にテーブルを返すモジュールを置くと
+`lua/refsearch/sources/<name>.lua` にテーブルを返すモジュールを置くと
 (自プラグインの runtimepath でも可)、ソースとして使えるようになる。
 
 必須フィールド:
@@ -79,20 +79,20 @@ sources          ソースごとの設定テーブル。japanknowledge ソース
 任意フィールド:
     fetch(item, on_done)  項目の全文を on_done(text) で返す。
     open(item)            項目をブラウザで開く。
-    init(opts)            セッション初期化 (:JKSearchInit から呼ばれる)。
+    init(opts)            セッション初期化 (:RefSearchInit から呼ばれる)。
 
 ================================================================================
-4. 使い方                                               *jksearch-usage*
+4. 使い方                                               *refsearch-usage*
 
 コマンド:
-    :JKSearch [語]     語を検索。省略時はカーソル下の語 (辞書形化)。
-    :JKSearchInit      バックグラウンド Chrome を起動してセッション確立。
-    :JKSearchInit!     可視ウィンドウで Chrome を起動 (手動ログイン用)。
+    :RefSearch [語]     語を検索。省略時はカーソル下の語 (辞書形化)。
+    :RefSearchInit      バックグラウンド Chrome を起動してセッション確立。
+    :RefSearchInit!     可視ウィンドウで Chrome を起動 (手動ログイン用)。
 
 Lua API:
-    require("jksearch").command({ "語" })   コマンド本体。
-    require("jksearch").search_cursor()     カーソル下の語を検索。
-    require("jksearch").init({ visible })   セッション初期化。
+    require("refsearch").command({ "語" })   コマンド本体。
+    require("refsearch").search_cursor()     カーソル下の語を検索。
+    require("refsearch").init({ visible })   セッション初期化。
 
 検索結果は画面下部のパネルに表示され、索引ウィンドウでは以下のキーが
 使えます:
@@ -104,14 +104,14 @@ Lua API:
 ネットワークアクセスなしで表示されます。
 
 ================================================================================
-5. 注意                                                 *jksearch-notice*
+5. 注意                                                 *refsearch-notice*
 
 ジャパンナレッジLib は有料の契約データベースです。契約している機関の
 アカウントでのみ使用してください。所属機関やジャパンナレッジの利用規約が
 自動アクセスを禁止している場合は使用しないでください。
 
 ================================================================================
-6. ライセンス                                         *jksearch-license*
+6. ライセンス                                         *refsearch-license*
 
 MIT
 

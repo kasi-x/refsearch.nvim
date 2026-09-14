@@ -1,5 +1,5 @@
-describe("jksearch.config", function()
-  local config = require("jksearch.config")
+describe("refsearch.config", function()
+  local config = require("refsearch.config")
 
   it("has no institution-specific defaults", function()
     local jk = config.DATA.sources.japanknowledge

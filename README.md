@@ -1,12 +1,12 @@
-# jk-search.nvim
+# refsearch.nvim
 
-[![Test](https://github.com/kasi-x/jk-search.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/kasi-x/jk-search.nvim/actions/workflows/test.yml)
-[![Luacheck](https://github.com/kasi-x/jk-search.nvim/actions/workflows/luacheck.yml/badge.svg)](https://github.com/kasi-x/jk-search.nvim/actions/workflows/luacheck.yml)
-[![StyLua](https://github.com/kasi-x/jk-search.nvim/actions/workflows/stylua.yml/badge.svg)](https://github.com/kasi-x/jk-search.nvim/actions/workflows/stylua.yml)
+[![Test](https://github.com/kasi-x/refsearch.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/kasi-x/refsearch.nvim/actions/workflows/test.yml)
+[![Luacheck](https://github.com/kasi-x/refsearch.nvim/actions/workflows/luacheck.yml/badge.svg)](https://github.com/kasi-x/refsearch.nvim/actions/workflows/luacheck.yml)
+[![StyLua](https://github.com/kasi-x/refsearch.nvim/actions/workflows/stylua.yml/badge.svg)](https://github.com/kasi-x/refsearch.nvim/actions/workflows/stylua.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 カーソル下の語で [ジャパンナレッジLib](https://japanknowledge.com/lib/) を検索する
-Neovim プラグイン。詳細は Vim help (`:h jksearch`) も参照してください。
+Neovim プラグイン。詳細は Vim help (`:h refsearch`) も参照してください。
 
 > Search Japan Knowledge Lib from Neovim with lemma normalization via
 > [bunsetsu.nvim](https://github.com/kasi-x/bunsetsu.nvim) (OpenAthens; docs in Japanese).
@@ -19,8 +19,8 @@ Neovim プラグイン。詳細は Vim help (`:h jksearch`) も参照してく�
 **アーキテクチャ (ref.vim 風)**: このプラグインは検索ソースのフレームワーク
 (ピッカー・クエリ抽出・履歴) であり、検索先は**ソース**として追加します。
 ジャパンナレッジLib は同梱のオプショナルソース
-(`lua/jksearch/sources/japanknowledge.lua`) で、使わなければ読み込まれません。
-自前のソースを `lua/jksearch/sources/<name>.lua` に置けば追加できます。
+(`lua/refsearch/sources/japanknowledge.lua`) で、使わなければ読み込まれません。
+自前のソースを `lua/refsearch/sources/<name>.lua` に置けば追加できます。
 
 所属機関の OpenAthens 経由でのアクセスを前提としています
 (大学等でジャパンナレッジLib を契約している方向け)。
@@ -49,7 +49,7 @@ Neovim プラグイン。詳細は Vim help (`:h jksearch`) も参照してく�
 
 ```lua
 {
-    "kasi-x/jk-search.nvim",
+    "kasi-x/refsearch.nvim",
     dependencies = { "kasi-x/bunsetsu.nvim" },
 }
 ```
@@ -58,18 +58,18 @@ puppeteer-core をグローバルにインストールしていない場合は�
 ディレクトリでローカルインストールできます (node が自動で解決します):
 
 ```sh
-cd ~/.local/share/nvim/lazy/jk-search.nvim
+cd ~/.local/share/nvim/lazy/refsearch.nvim
 npm install
 ```
 
 ## 設定
 
-`vim.g.jksearch_configuration` にテーブルで渡します。
+`vim.g.refsearch_configuration` にテーブルで渡します。
 `redirector` と `proxy` は所属機関固有のため**必須**です
 (図書館のデータベース案内ページ等でご確認ください)。
 
 ```lua
-vim.g.jksearch_configuration = {
+vim.g.refsearch_configuration = {
     -- 所属機関の OpenAthens リダイレクタ URL (必須)
     redirector = "https://go.openathens.net/redirector/<your-domain>",
     -- OpenAthens proxy のベース URL (必須)
@@ -109,20 +109,20 @@ return M
 
 ```lua
 -- plugin/jk_ac.lua (private)
-require("jksearch.config").setup(require("jk_ac").institution)
+require("refsearch.config").setup(require("jk_ac").institution)
 
 vim.keymap.set("n", "B", function()
-  require("jksearch").search_cursor()
+  require("refsearch").search_cursor()
 end, { desc = "jk-ac: カーソル下の語をジャパンナレッジで検索" })
 ```
 
-lazy.nvim では dependencies に jk-search.nvim を指定します (dependency が
+lazy.nvim では dependencies に refsearch.nvim を指定します (dependency が
 先に読み込まれるため、設定はコマンド実行時に確実に反映されます):
 
 ```lua
 {
     "/home/user/dev/jk_ac.nvim",
-    dependencies = { "kasi-x/jk-search.nvim" },
+    dependencies = { "kasi-x/refsearch.nvim" },
 }
 ```
 
@@ -130,31 +130,31 @@ lazy.nvim では dependencies に jk-search.nvim を指定します (dependency 
 
 | 項目 | 省略値 | 説明 |
 | --- | --- | --- |
-| `script` | `~/.local/share/jk-search/bin/jk-search.js` | 検索スクリプトのパス |
-| `profile` | `~/.local/share/jk-search/profile` | Chrome 専用プロファイル (ログイン状態の保持用) |
-| `history_file` | `~/.local/share/jk-search/history.json` | 検索履歴キャッシュの保存先 |
+| `script` | `~/.local/share/refsearch/bin/refsearch.js` | 検索スクリプトのパス |
+| `profile` | `~/.local/share/refsearch/profile` | Chrome 専用プロファイル (ログイン状態の保持用) |
+| `history_file` | `~/.local/share/refsearch/history.json` | 検索履歴キャッシュの保存先 |
 
 ## 使い方
 
 ```vim
-:JKSearch 実験        " 指定語を検索
-:JKSearch             " カーソル下の語を検索 (bunsetsu.nvim で辞書形化)
-:JKSearchInit         " バックグラウンド Chrome を起動してセッション確立
-:JKSearchInit!        " 可視ウィンドウで Chrome を起動 (手動ログイン用)
+:RefSearch 実験        " 指定語を検索
+:RefSearch             " カーソル下の語を検索 (bunsetsu.nvim で辞書形化)
+:RefSearchInit         " バックグラウンド Chrome を起動してセッション確立
+:RefSearchInit!        " 可視ウィンドウで Chrome を起動 (手動ログイン用)
 ```
 
 Lua API:
 
 ```lua
 -- カーソル下の検索語を取得 (辞書形化 + 複合名詞展開)
-local word = require("jksearch").word_under_cursor()
+local word = require("refsearch").word_under_cursor()
 ```
 
 お好みでキーマップに登録できます:
 
 ```lua
-vim.keymap.set("n", "B", function() require("jksearch").search_cursor() end,
-    { desc = "jk-search: カーソル下の語を検索" })
+vim.keymap.set("n", "B", function() require("refsearch").search_cursor() end,
+    { desc = "refsearch: カーソル下の語を検索" })
 ```
 
 検索結果は画面下部のパネルで表示されます:
@@ -179,9 +179,9 @@ vim.keymap.set("n", "B", function() require("jksearch").search_cursor() end,
 - 完全一致が無い → 検索結果の見出し一覧から選択
 - カーソル下の語が名詞のとき、連続する名詞を一語にまとめて検索する
   (例: 「形態素解析」は 形態素/解析 に分割されず「形態素解析」で検索)
-- 未ログイン → ログインを案内 (`:JKSearchInit!` で可視 Chrome を開いて手動ログイン)
+- 未ログイン → ログインを案内 (`:RefSearchInit!` で可視 Chrome を開いて手動ログイン)
 - 同時接続数オーバー → その旨を通知
-- 検索結果と意味全文はローカル (`~/.local/share/jk-search/history.json`)
+- 検索結果と意味全文はローカル (`~/.local/share/refsearch/history.json`)
   にキャッシュされ、同じ語の再検索はネットワークアクセスなしで表示される
 
 ## 開発
@@ -199,7 +199,7 @@ make check-stylua
 
 ## ソースを追加する
 
-`lua/jksearch/sources/<name>.lua` に次のフィールドを持つテーブルを返す
+`lua/refsearch/sources/<name>.lua` に次のフィールドを持つテーブルを返す
 モジュールを置くと (自プラグインの runtimepath でも可)、`default_source`
 やソース切り替えから使えます:
 

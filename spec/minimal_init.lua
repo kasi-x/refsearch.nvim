@@ -3,4 +3,4 @@
 
 vim.opt.rtp:append(".")
 
-vim.cmd("runtime plugin/jksearch.vim")
+vim.cmd("runtime plugin/refsearch.vim")

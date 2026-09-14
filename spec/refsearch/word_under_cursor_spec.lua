@@ -1,5 +1,5 @@
-describe("jksearch.word_under_cursor() (public API)", function()
-  local jksearch = require("jksearch")
+describe("refsearch.word_under_cursor() (public API)", function()
+  local refsearch = require("refsearch")
 
   before_each(function()
     -- bunsetsu (Vibrato トークナイザ) のスタブ
@@ -50,23 +50,23 @@ describe("jksearch.word_under_cursor() (public API)", function()
 
   it("expands consecutive nouns into a compound search word", function()
     vim.api.nvim_win_set_cursor(0, { 1, 2 }) -- 「形態素」の中
-    assert.are.equal("形態素解析", jksearch.word_under_cursor())
+    assert.are.equal("形態素解析", refsearch.word_under_cursor())
     vim.api.nvim_win_set_cursor(0, { 1, 11 }) -- 「解析」の中
-    assert.are.equal("形態素解析", jksearch.word_under_cursor())
+    assert.are.equal("形態素解析", refsearch.word_under_cursor())
   end)
 
   it("returns the particle itself when the cursor is on one", function()
     vim.api.nvim_win_set_cursor(0, { 1, 16 }) -- 「を」
-    assert.are.equal("を", jksearch.word_under_cursor())
+    assert.are.equal("を", refsearch.word_under_cursor())
   end)
 
   it("returns the verb surface when the cursor is on one", function()
     vim.api.nvim_win_set_cursor(0, { 1, 20 }) -- 「する」
-    assert.are.equal("する", jksearch.word_under_cursor())
+    assert.are.equal("する", refsearch.word_under_cursor())
   end)
 
   it("returns nil when no word is under the cursor", function()
     vim.api.nvim_win_set_cursor(0, { 1, 27 }) -- 「。」の末尾
-    assert.is_nil(jksearch.word_under_cursor())
+    assert.is_nil(refsearch.word_under_cursor())
   end)
 end)

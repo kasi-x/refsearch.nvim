@@ -1,4 +1,4 @@
--- jk-search 検索履歴の保存・読み込み (ソースごとに分けて保存)。
+-- refsearch 検索履歴の保存・読み込み (ソースごとに分けて保存)。
 --
 -- 保存ファイルの構造:
 --   {
@@ -14,14 +14,24 @@
 -- 互換性: 旧版 (ソース名なしのフラット構造) のエントリは japanknowledge
 -- の検索として読み替える。
 
-local config = require("jksearch.config")
+local config = require("refsearch.config")
 
 local M = {}
 
 ---履歴ファイルのパス。
 ---@return string
 function M.file()
-  return config.DATA.history_file or vim.fn.expand("~/.local/share/jk-search/history.json")
+  local default = vim.fn.expand("~/.local/share/refsearch/history.json")
+  if config.DATA.history_file then
+    return config.DATA.history_file
+  end
+  -- 旧プラグイン名 (jk-search.nvim) 時代の履歴を 1 回だけ引き継ぐ
+  local legacy = vim.fn.expand("~/.local/share/jk-search/history.json")
+  if vim.fn.filereadable(legacy) == 1 and vim.fn.filereadable(default) == 0 then
+    vim.fn.mkdir(vim.fn.fnamemodify(default, ":h"), "p")
+    vim.fn.writefile(vim.fn.readfile(legacy), default)
+  end
+  return default
 end
 
 ---履歴全体を読み込む。無ければ空テーブル。

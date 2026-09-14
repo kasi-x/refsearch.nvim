@@ -1,6 +1,6 @@
-describe("jksearch.history (source-keyed)", function()
-  local config = require("jksearch.config")
-  local history = require("jksearch.history")
+describe("refsearch.history (source-keyed)", function()
+  local config = require("refsearch.config")
+  local history = require("refsearch.history")
 
   local tmp
 

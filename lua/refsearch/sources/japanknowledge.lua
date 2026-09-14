@@ -6,18 +6,18 @@
 -- 設定が必須 (機関設定プラグインや vim.g で設定する)。
 --
 -- 使い方:
---   :JKSearch [語]     検索 (既定ソースが japanknowledge のとき)
---   :JKSearchInit      Chrome セッションを初期化
---   :JKSearchInit!     可視 Chrome で初期化 (手動ログイン用)
+--   :RefSearch [語]     検索 (既定ソースが japanknowledge のとき)
+--   :RefSearchInit      Chrome セッションを初期化
+--   :RefSearchInit!     可視 Chrome で初期化 (手動ログイン用)
 --
--- 設定 (vim.g.jksearch_configuration の sources.japanknowledge):
+-- 設定 (vim.g.refsearch_configuration の sources.japanknowledge):
 --   redirector : OpenAthens リダイレクタ URL (必須)
 --   proxy      : OpenAthens proxy のベース URL (必須)
---   script     : 検索スクリプト (jk-search.js) のパス
+--   script     : 検索スクリプト (refsearch.js) のパス
 --   node       : node 実行ファイル
 --   headless   : true でヘッドレス Chrome
 
-local config = require("jksearch.config")
+local config = require("refsearch.config")
 
 local M = {
   name = "japanknowledge",
@@ -42,6 +42,26 @@ local function source_config()
   return (config.DATA.sources and config.DATA.sources[M.name]) or {}
 end
 
+---検索スクリプト (bin/refsearch.js) のパスを返す。
+---未設定なら runtimepath から自動解決する。
+---@return string
+local function script_path()
+  local sc = source_config()
+  if sc.script and sc.script ~= "" then
+    return sc.script
+  end
+  local found = vim.api.nvim_get_runtime_file("bin/refsearch.js", false)
+  return found[1] or ""
+end
+
+---Chrome 専用プロファイルのパスを返す。
+---既定は旧プラグイン名時代と同じパス (Chrome のログインセッションを引き継ぐ)。
+---@return string
+local function profile_path()
+  local sc = source_config()
+  return sc.profile or vim.fn.expand("~/.local/share/jk-search/profile")
+end
+
 ---スクリプト実行用の環境変数プレフィックス ({ "env", "NODE_PATH=...", ... })。
 ---@return string[]
 local function env_args()
@@ -52,13 +72,17 @@ local function env_args()
     args[#args + 1] = "NODE_PATH=" .. np
   end
   if sc.redirector and sc.redirector ~= "" then
-    args[#args + 1] = "JK_REDIRECTOR=" .. sc.redirector
+    args[#args + 1] = "RS_REDIRECTOR=" .. sc.redirector
   end
   if sc.proxy and sc.proxy ~= "" then
-    args[#args + 1] = "JK_PROXY=" .. sc.proxy
+    args[#args + 1] = "RS_PROXY=" .. sc.proxy
+  end
+  local profile = profile_path()
+  if profile ~= "" then
+    args[#args + 1] = "RS_PROFILE=" .. profile
   end
   if sc.headless then
-    args[#args + 1] = "JK_HEADLESS=1"
+    args[#args + 1] = "RS_HEADLESS=1"
   end
   return args
 end
@@ -71,7 +95,7 @@ local outputs = {}
 ---@param on_finish fun(outdata: string[]|nil, code: number)
 local function run_js(args, on_finish)
   local sc = source_config()
-  local argv = vim.list_extend({ sc.node or "node", sc.script }, args)
+  local argv = vim.list_extend({ sc.node or "node", script_path() }, args)
   local job = vim.fn.jobstart(vim.list_extend(env_args(), argv), {
     stdout_buffered = true,
     on_stdout = function(j, data)
@@ -93,12 +117,12 @@ end
 ---認証が必要なときの案内。
 local function notify_auth()
   vim.notify(
-    "ジャパンナレッジ: ログインが必要です (:JKSearchInit! で可視 Chrome を開いて手動ログイン)",
+    "ジャパンナレッジ: ログインが必要です (:RefSearchInit! で可視 Chrome を開いて手動ログイン)",
     vim.log.levels.WARN
   )
 end
 
----検索して結果を返す (:JKSearch から呼ばれる)。
+---検索して結果を返す (:RefSearch から呼ばれる)。
 ---認証が必要・同時接続オーバーの場合は案内を表示し、error ステータスを返す。
 ---@param query string 検索語
 ---@param on_result fun(data: table)
@@ -177,20 +201,20 @@ function M.open(item)
   )
 end
 
----Chrome セッションを初期化する (:JKSearchInit)。
+---Chrome セッションを初期化する (:RefSearchInit)。
 ---@param opts? { visible?: boolean }
 function M.init_session(opts)
   local args = env_args()
-  -- 強制可視 (ログイン時) なら JK_HEADLESS を外す
+  -- 強制可視 (ログイン時) なら RS_HEADLESS を外す
   if opts and opts.visible then
     for i = #args, 1, -1 do
-      if args[i] == "JK_HEADLESS=1" then
+      if args[i] == "RS_HEADLESS=1" then
         table.remove(args, i)
       end
     end
   end
   local sc = source_config()
-  vim.fn.jobstart(vim.list_extend(args, { sc.node or "node", sc.script, "--init" }), {
+  vim.fn.jobstart(vim.list_extend(args, { sc.node or "node", script_path(), "--init" }), {
     stdout_buffered = true,
     on_stdout = function(_, data)
       if data and #data > 0 then

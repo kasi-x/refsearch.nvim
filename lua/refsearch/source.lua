@@ -1,6 +1,6 @@
 ---検索ソースのレジストリ (ref.vim の source のような仕組み)。
 --
--- ソースは `lua/jksearch/sources/<name>.lua` として実装し、次のフィールドを
+-- ソースは `lua/refsearch/sources/<name>.lua` として実装し、次のフィールドを
 -- 持つテーブルを返す (自プラグインの runtimepath におけばサードパーティ製
 -- ソースも解決できる):
 --
@@ -14,7 +14,7 @@
 -- search の結果は { status = "ok", results = {...}, exact = {...}, total = n }
 -- か { status = "error", message = "..." }。
 
-local config = require("jksearch.config")
+local config = require("refsearch.config")
 
 local M = {}
 
@@ -36,7 +36,7 @@ function M.get(name)
   if registry[name] then
     return registry[name]
   end
-  local ok, mod = pcall(require, "jksearch.sources." .. name)
+  local ok, mod = pcall(require, "refsearch.sources." .. name)
   if not ok then
     return nil
   end

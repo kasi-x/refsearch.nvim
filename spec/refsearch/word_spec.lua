@@ -1,5 +1,5 @@
-describe("jksearch.word (cursor word helpers)", function()
-  local word = require("jksearch.word")
+describe("refsearch.word (cursor word helpers)", function()
+  local word = require("refsearch.word")
 
   describe("truncate()", function()
     it("truncates ascii text to the display width", function()

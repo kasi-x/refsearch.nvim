@@ -1,14 +1,14 @@
----jk-search.nvim: 検索ソースフレームワークの公開 API。
+---refsearch.nvim: 検索ソースフレームワークの公開 API。
 --
--- 検索そのものは `lua/jksearch/sources/<name>.lua` (例: japanknowledge) が
+-- 検索そのものは `lua/refsearch/sources/<name>.lua` (例: japanknowledge) が
 -- 担当し、このモジュールはクエリ抽出・ソースへのディスパッチ・履歴・
 -- ピッカー表示のオーケストレーションを担当する。
 
-local config = require("jksearch.config")
-local history = require("jksearch.history")
-local picker = require("jksearch.picker")
-local source_mod = require("jksearch.source")
-local word = require("jksearch.word")
+local config = require("refsearch.config")
+local history = require("refsearch.history")
+local picker = require("refsearch.picker")
+local source_mod = require("refsearch.source")
+local word = require("refsearch.word")
 
 local M = {}
 
@@ -42,12 +42,12 @@ end
 function M.word_under_cursor()
   local ok, bunsetsu = pcall(require, "bunsetsu")
   if not ok then
-    vim.notify("jk-search: bunsetsu.nvim が見つかりません", vim.log.levels.ERROR)
+    vim.notify("refsearch: bunsetsu.nvim が見つかりません", vim.log.levels.ERROR)
     return nil
   end
   local r = bunsetsu.lemma_under_cursor()
   if not r then
-    vim.notify("jk-search: カーソル下の語を特定できません", vim.log.levels.INFO)
+    vim.notify("refsearch: カーソル下の語を特定できません", vim.log.levels.INFO)
     return nil
   end
   -- 名詞なら複合名詞 (名詞+名詞) を一語で検索する。
@@ -69,7 +69,7 @@ function M.search(query)
   local source = source_mod.default()
   if not source or not source.search then
     vim.notify(
-      "jk-search: 検索ソースが見つかりません ("
+      "refsearch: 検索ソースが見つかりません ("
         .. tostring(config.DATA.default_source)
         .. ")",
       vim.log.levels.ERROR
@@ -122,7 +122,7 @@ function M.search(query)
   end)
 end
 
----コマンド実装: :JKSearch [語]
+---コマンド実装: :RefSearch [語]
 ---語を省略した場合はカーソル下の語を使う。
 ---@param args string[]
 function M.command(args)
@@ -144,7 +144,7 @@ function M.search_cursor()
   end
 end
 
----既定ソースのセッションを初期化する (:JKSearchInit)。
+---既定ソースのセッションを初期化する (:RefSearchInit)。
 ---@param opts? { visible?: boolean }
 function M.init_session(opts)
   local source = source_mod.default()
@@ -152,13 +152,13 @@ function M.init_session(opts)
     source.init_session(opts)
   else
     vim.notify(
-      "jk-search: 既定ソースにセッション初期化がありません",
+      "refsearch: 既定ソースにセッション初期化がありません",
       vim.log.levels.WARN
     )
   end
 end
 
----互換用エイリアス (:JKSearchInit から呼ばれる)。
+---互換用エイリアス (:RefSearchInit から呼ばれる)。
 M.init = M.init_session
 
 return M
