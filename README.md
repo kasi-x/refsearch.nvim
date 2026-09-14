@@ -78,6 +78,48 @@ vim.g.jksearch_configuration = {
 }
 ```
 
+### 機関設定をプラグインとして分離する (推奨パターン)
+
+`redirector` / `proxy` は機関固有のため、公開リポジトリに含めたくない場合。
+薄い設定プラグインを作り、そこにだけ機関情報を置くことができます:
+
+```
+~/dev/jk_ac.nvim/          ← private (機関情報を含む)
+  lua/jk_ac/init.lua
+  plugin/jk_ac.lua
+```
+
+```lua
+-- lua/jk_ac/init.lua (private)
+local M = {}
+
+M.institution = {
+  redirector = "https://go.openathens.net/redirector/<your-domain>",
+  proxy = "https://<resource>.proxy.openathens.net",
+}
+
+return M
+```
+
+```lua
+-- plugin/jk_ac.lua (private)
+require("jksearch.config").setup(require("jk_ac").institution)
+
+vim.keymap.set("n", "B", function()
+  require("jksearch").search_cursor()
+end, { desc = "jk-ac: カーソル下の語をジャパンナレッジで検索" })
+```
+
+lazy.nvim では dependencies に jk-search.nvim を指定します (dependency が
+先に読み込まれるため、設定はコマンド実行時に確実に反映されます):
+
+```lua
+{
+    "/home/user/dev/jk_ac.nvim",
+    dependencies = { "kasi-x/jk-search.nvim" },
+}
+```
+
 通常は上記だけで十分です。その他の設定項目 (すべて省略可):
 
 | 項目 | 省略値 | 説明 |
